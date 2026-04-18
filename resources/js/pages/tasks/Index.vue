@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import type { Auth } from '@/types';
 
 defineOptions({
     layout: {
@@ -52,6 +54,11 @@ const props = defineProps<{
         pendingFollowUps: number;
     };
 }>();
+
+const page = usePage<{ auth: Auth }>();
+const permissions = computed(() => page.props.auth?.context?.permissions ?? []);
+const canCreateTasks = computed(() => permissions.value.includes('tasks.create'));
+const canCreateFollowUps = computed(() => permissions.value.includes('followups.create'));
 
 const taskForm = useForm({
     title: '',
@@ -130,7 +137,7 @@ const submitFollowUp = () => {
 
         <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
             <div class="space-y-6">
-                <form class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitTask">
+                <form v-if="canCreateTasks" class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitTask">
                     <h2 class="text-lg font-semibold">Create task</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Add an actionable item for a teammate or lead workflow.</p>
 
@@ -183,6 +190,10 @@ const submitFollowUp = () => {
                     </div>
                 </form>
 
+                <div v-else class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 text-sm text-muted-foreground dark:border-sidebar-border">
+                    Your current role can view tasks, but cannot create new tasks.
+                </div>
+
                 <div class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                     <h2 class="text-lg font-semibold">Task list</h2>
                     <div class="mt-5 overflow-x-auto">
@@ -217,7 +228,7 @@ const submitFollowUp = () => {
             </div>
 
             <div class="space-y-6">
-                <form class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitFollowUp">
+                <form v-if="canCreateFollowUps" class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitFollowUp">
                     <h2 class="text-lg font-semibold">Schedule follow-up</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Set the next touchpoint for a lead or task.</p>
 
@@ -266,6 +277,10 @@ const submitFollowUp = () => {
                         </button>
                     </div>
                 </form>
+
+                <div v-else class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 text-sm text-muted-foreground dark:border-sidebar-border">
+                    Your current role can view follow-ups, but cannot schedule them.
+                </div>
 
                 <div class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                     <h2 class="text-lg font-semibold">Upcoming follow-ups</h2>

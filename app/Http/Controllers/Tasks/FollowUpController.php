@@ -11,6 +11,8 @@ class FollowUpController extends Controller
 {
     public function store(StoreFollowUpRequest $request): RedirectResponse
     {
+        $this->authorize('create', FollowUp::class);
+
         $tenantId = $request->user()->current_tenant_id;
         $data = $request->validated();
 

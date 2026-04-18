@@ -19,6 +19,8 @@ class TaskController extends Controller
 {
     public function index(): Response
     {
+        $this->authorize('viewAny', Task::class);
+
         $tenantId = request()->user()->current_tenant_id;
 
         $tasks = Task::query()
@@ -86,6 +88,8 @@ class TaskController extends Controller
 
     public function store(StoreTaskRequest $request): RedirectResponse
     {
+        $this->authorize('create', Task::class);
+
         $tenantId = $request->user()->current_tenant_id;
         $data = $request->validated();
 

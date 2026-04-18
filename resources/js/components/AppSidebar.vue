@@ -29,6 +29,9 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
+    const permissions = page.props.auth?.context?.permissions ?? [];
+    const currentTenantRole = page.props.auth?.context?.currentTenantRole ?? '';
+
     if (page.props.auth?.context?.isSuperAdmin) {
         items.push({
             title: 'Super Admin',
@@ -39,26 +42,35 @@ const mainNavItems = computed<NavItem[]>(() => {
         return items;
     }
 
-    if (['tenant_admin', 'manager'].includes(page.props.auth?.context?.currentTenantRole ?? '')) {
+    if (['tenant_admin', 'manager'].includes(currentTenantRole)) {
         items.push({
             title: 'Tenant Admin',
             href: '/tenant-admin/dashboard',
             icon: Users,
         });
+
+        items.push({
+            title: 'Team',
+            href: '/tenant-admin/team',
+            icon: Users,
+        });
     }
 
-    items.push(
-        {
+    if (permissions.includes('leads.view')) {
+        items.push({
             title: 'Leads',
             href: '/leads',
             icon: UsersRound,
-        },
-        {
+        });
+    }
+
+    if (permissions.includes('tasks.view')) {
+        items.push({
             title: 'Tasks',
             href: '/tasks',
             icon: ListChecks,
-        },
-    );
+        });
+    }
 
     return items;
 });
