@@ -12,6 +12,8 @@ class LeadSourceController extends Controller
 {
     public function store(StoreLeadSourceRequest $request): RedirectResponse
     {
+        $this->authorize('create', LeadSource::class);
+
         $tenantId = $request->user()->current_tenant_id;
         $name = $request->validated()['name'];
         $baseSlug = Str::slug($name) ?: 'source';

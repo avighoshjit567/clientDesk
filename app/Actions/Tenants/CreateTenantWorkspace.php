@@ -9,6 +9,7 @@ use App\Models\TenantSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class CreateTenantWorkspace
 {
@@ -44,6 +45,9 @@ class CreateTenantWorkspace
                 'joined_at' => now(),
                 'invited_by_user_id' => null,
             ]);
+
+            Role::findOrCreate('tenant_admin', 'web');
+            $user->syncRoles(['tenant_admin']);
 
             LeadSource::query()->insert([
                 [
