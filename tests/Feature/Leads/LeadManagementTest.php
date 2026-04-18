@@ -127,6 +127,20 @@ class LeadManagementTest extends TestCase
         ]);
     }
 
+    public function test_users_without_lead_permissions_receive_forbidden_on_leads_index(): void
+    {
+        $user = User::factory()->create();
+        $tenant = $this->createWorkspaceForUser($user);
+
+        $tenant->users()->updateExistingPivot($user->id, [
+            'role' => 'observer',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('leads.index'))
+            ->assertForbidden();
+    }
+
     private function createWorkspaceForUser(User $user): Tenant
     {
         $plan = SubscriptionPlan::query()->create([
