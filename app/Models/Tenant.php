@@ -52,6 +52,16 @@ class Tenant extends Model
         return $this->hasMany(TenantInvitation::class);
     }
 
+    public function leadSources(): HasMany
+    {
+        return $this->hasMany(LeadSource::class);
+    }
+
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)

@@ -58,4 +58,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(TenantInvitation::class, 'invited_by_user_id');
     }
+
+    public function assignedLeads(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'assigned_to_user_id');
+    }
+
+    public function createdLeads(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'created_by_user_id');
+    }
 }
