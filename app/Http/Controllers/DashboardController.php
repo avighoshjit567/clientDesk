@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
+use App\Models\Task;
 use App\Models\TenantInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Redirect;
@@ -34,6 +35,7 @@ class DashboardController extends Controller
                 'memberCount' => $tenant->users()->count(),
                 'pendingInvitationCount' => TenantInvitation::query()->where('tenant_id', $tenant->id)->whereNull('accepted_at')->count(),
                 'leadCount' => Lead::query()->where('tenant_id', $tenant->id)->count(),
+                'taskCount' => Task::query()->where('tenant_id', $tenant->id)->count(),
             ],
         ]);
     }

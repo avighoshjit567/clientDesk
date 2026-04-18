@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid, UsersRound } from 'lucide-vue-next';
+import { BookOpen, FolderGit2, LayoutGrid, ListChecks, UsersRound } from 'lucide-vue-next';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         title: 'Leads',
         href: '/leads',
         icon: UsersRound,
+    },
+    {
+        title: 'Tasks',
+        href: '/tasks',
+        icon: ListChecks,
     },
 ];
 

@@ -3,6 +3,8 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Leads\LeadController;
 use App\Http\Controllers\Leads\LeadSourceController;
+use App\Http\Controllers\Tasks\FollowUpController;
+use App\Http\Controllers\Tasks\TaskController;
 use App\Http\Controllers\Tenants\TenantOnboardingController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -24,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('leads', [LeadController::class, 'index'])->name('leads.index');
         Route::post('leads', [LeadController::class, 'store'])->name('leads.store');
         Route::post('lead-sources', [LeadSourceController::class, 'store'])->name('lead-sources.store');
+        Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
+        Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
+        Route::post('follow-ups', [FollowUpController::class, 'store'])->name('follow-ups.store');
     });
 });
 

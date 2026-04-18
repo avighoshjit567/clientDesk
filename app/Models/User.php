@@ -68,4 +68,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(Lead::class, 'created_by_user_id');
     }
+
+    public function assignedTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assigned_to_user_id');
+    }
+
+    public function createdTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'created_by_user_id');
+    }
+
+    public function assignedFollowUps(): HasMany
+    {
+        return $this->hasMany(FollowUp::class, 'assigned_to_user_id');
+    }
+
+    public function createdFollowUps(): HasMany
+    {
+        return $this->hasMany(FollowUp::class, 'created_by_user_id');
+    }
 }

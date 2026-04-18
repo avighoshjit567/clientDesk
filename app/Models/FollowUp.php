@@ -2,33 +2,31 @@
 
 namespace App\Models;
 
-use App\Enums\LeadStatus;
+use App\Enums\FollowUpStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'tenant_id',
-    'lead_source_id',
+    'lead_id',
+    'task_id',
     'assigned_to_user_id',
     'created_by_user_id',
-    'first_name',
-    'last_name',
-    'email',
-    'primary_phone',
+    'scheduled_for',
     'status',
     'notes',
 ])]
-class Lead extends Model
+class FollowUp extends Model
 {
     use HasFactory;
 
     protected function casts(): array
     {
         return [
-            'status' => LeadStatus::class,
+            'scheduled_for' => 'datetime',
+            'status' => FollowUpStatus::class,
         ];
     }
 
@@ -37,9 +35,14 @@ class Lead extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function source(): BelongsTo
+    public function lead(): BelongsTo
     {
-        return $this->belongsTo(LeadSource::class, 'lead_source_id');
+        return $this->belongsTo(Lead::class);
+    }
+
+    public function task(): BelongsTo
+    {
+        return $this->belongsTo(Task::class);
     }
 
     public function assignedTo(): BelongsTo
@@ -50,20 +53,5 @@ class Lead extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_user_id');
-    }
-
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
-    }
-
-    public function followUps(): HasMany
-    {
-        return $this->hasMany(FollowUp::class);
-    }
-
-    public function getFullNameAttribute(): string
-    {
-        return trim($this->first_name.' '.$this->last_name);
     }
 }

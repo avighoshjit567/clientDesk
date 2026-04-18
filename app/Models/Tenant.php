@@ -62,6 +62,16 @@ class Tenant extends Model
         return $this->hasMany(Lead::class);
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function followUps(): HasMany
+    {
+        return $this->hasMany(FollowUp::class);
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)

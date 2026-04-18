@@ -26,6 +26,7 @@ defineProps<{
         memberCount: number;
         pendingInvitationCount: number;
         leadCount: number;
+        taskCount: number;
     };
 }>();
 </script>
@@ -76,6 +77,12 @@ defineProps<{
                 <p class="text-sm text-muted-foreground">Leads</p>
                 <p class="mt-2 text-3xl font-semibold">{{ stats.leadCount }}</p>
                 <p class="mt-2 text-sm text-muted-foreground">Current leads tracked inside this workspace.</p>
+            </div>
+
+            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
+                <p class="text-sm text-muted-foreground">Tasks</p>
+                <p class="mt-2 text-3xl font-semibold">{{ stats.taskCount }}</p>
+                <p class="mt-2 text-sm text-muted-foreground">Open workflow items for your current team.</p>
             </div>
         </section>
 
