@@ -3,14 +3,20 @@ export type User = {
     name: string;
     email: string;
     avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
+    email_verified_at?: string | null;
+    created_at?: string;
+    updated_at?: string;
+    platform_role?: string | null;
+    current_tenant_id?: number | null;
     [key: string]: unknown;
 };
 
 export type Auth = {
-    user: User;
+    user: User | null;
+    context?: {
+        isSuperAdmin: boolean;
+        currentTenantRole: string | null;
+    };
 };
 
 export type TwoFactorConfigContent = {

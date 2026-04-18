@@ -15,10 +15,19 @@ class DashboardController extends Controller
     public function __invoke(): Response|RedirectResponse
     {
         $user = request()->user();
+
+        if ($user?->isSuperAdmin()) {
+            return Redirect::route('super-admin.dashboard');
+        }
+
         $tenant = $user?->currentTenant?->loadMissing(['subscriptionPlan', 'settings']);
 
         if ($tenant === null) {
             return Redirect::route('tenants.onboarding.create');
+        }
+
+        if ($user->hasCurrentTenantRole(['tenant_admin', 'manager'])) {
+            return Redirect::route('tenant-admin.dashboard');
         }
 
         return Inertia::render('Dashboard', [

@@ -14,13 +14,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'phone', 'password', 'platform_role', 'current_tenant_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
+
+    protected string $guard_name = 'web';
 
     /**
      * Get the attributes that should be cast.
@@ -87,5 +90,31 @@ class User extends Authenticatable
     public function createdFollowUps(): HasMany
     {
         return $this->hasMany(FollowUp::class, 'created_by_user_id');
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->platform_role === PlatformRole::SuperAdmin || $this->hasRole('super_admin');
+    }
+
+    public function currentTenantRole(): ?string
+    {
+        if (! $this->current_tenant_id) {
+            return null;
+        }
+
+        return $this->tenants()
+            ->where('tenants.id', $this->current_tenant_id)
+            ->first()?->pivot?->role;
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     */
+    public function hasCurrentTenantRole(array $roles): bool
+    {
+        $role = $this->currentTenantRole();
+
+        return $role !== null && in_array($role, $roles, true);
     }
 }

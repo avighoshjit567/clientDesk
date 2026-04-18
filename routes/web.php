@@ -3,6 +3,8 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Leads\LeadController;
 use App\Http\Controllers\Leads\LeadSourceController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Http\Controllers\TenantAdmin\DashboardController as TenantAdminDashboardController;
 use App\Http\Controllers\Tasks\FollowUpController;
 use App\Http\Controllers\Tasks\TaskController;
 use App\Http\Controllers\Tenants\TenantOnboardingController;
@@ -21,6 +23,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('onboarding/workspace', [TenantOnboardingController::class, 'store'])
         ->name('tenants.onboarding.store');
+
+    Route::middleware('super.admin')->group(function () {
+        Route::get('super-admin/dashboard', SuperAdminDashboardController::class)->name('super-admin.dashboard');
+    });
+
+    Route::middleware(['tenant.workspace', 'tenant.admin'])->group(function () {
+        Route::get('tenant-admin/dashboard', TenantAdminDashboardController::class)->name('tenant-admin.dashboard');
+    });
 
     Route::middleware('tenant.workspace')->group(function () {
         Route::get('leads', [LeadController::class, 'index'])->name('leads.index');

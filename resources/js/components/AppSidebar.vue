@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid, ListChecks, UsersRound } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BookOpen, FolderGit2, LayoutGrid, ListChecks, ShieldCheck, Users, UsersRound } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -15,35 +16,62 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
+import type { Auth, NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Leads',
-        href: '/leads',
-        icon: UsersRound,
-    },
-    {
-        title: 'Tasks',
-        href: '/tasks',
-        icon: ListChecks,
-    },
-];
+const page = usePage<{ auth: Auth }>();
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    if (page.props.auth?.context?.isSuperAdmin) {
+        items.push({
+            title: 'Super Admin',
+            href: '/super-admin/dashboard',
+            icon: ShieldCheck,
+        });
+
+        return items;
+    }
+
+    if (['tenant_admin', 'manager'].includes(page.props.auth?.context?.currentTenantRole ?? '')) {
+        items.push({
+            title: 'Tenant Admin',
+            href: '/tenant-admin/dashboard',
+            icon: Users,
+        });
+    }
+
+    items.push(
+        {
+            title: 'Leads',
+            href: '/leads',
+            icon: UsersRound,
+        },
+        {
+            title: 'Tasks',
+            href: '/tasks',
+            icon: ListChecks,
+        },
+    );
+
+    return items;
+});
 
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
+        href: 'https://github.com/avighoshjit567/clientDesk',
         icon: FolderGit2,
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
+        href: 'https://laravel.com/docs',
         icon: BookOpen,
     },
 ];

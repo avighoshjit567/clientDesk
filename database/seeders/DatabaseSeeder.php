@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(RolePermissionSeeder::class);
+
         SubscriptionPlan::query()->upsert([
             [
                 'name' => 'Starter',
@@ -45,10 +47,12 @@ class DatabaseSeeder extends Seeder
             ],
         ], uniqueBy: ['slug'], update: ['name', 'description', 'price_monthly', 'price_yearly', 'max_users', 'is_active']);
 
-        User::factory()->create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'platform_role' => PlatformRole::SuperAdmin,
         ]);
+
+        $user->syncRoles(['super_admin']);
     }
 }
