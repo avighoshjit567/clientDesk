@@ -59,6 +59,14 @@ npm run build
 php artisan boost:install
 ```
 
+For repeatable local validation on this host, you can also run:
+
+```bash
+./scripts/validate-local.sh
+```
+
+That script uses SQLite for local validation so migrations, tests, type-checking, lint, and build can be run in one command even when MySQL is not being used locally.
+
 ## Environment defaults
 
 - database: MySQL
