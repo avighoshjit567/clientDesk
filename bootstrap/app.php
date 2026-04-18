@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Middleware\HandleAppearance;
+use App\Http\Middleware\EnsureCurrentTenant;
+use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsureTenantAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->alias([
+            'tenant.workspace' => EnsureCurrentTenant::class,
+            'super.admin' => EnsureSuperAdmin::class,
+            'tenant.admin' => EnsureTenantAdmin::class,
+        ]);
 
         $middleware->web(append: [
             HandleAppearance::class,
