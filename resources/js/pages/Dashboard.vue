@@ -25,6 +25,8 @@ defineProps<{
     stats: {
         memberCount: number;
         pendingInvitationCount: number;
+        leadCount: number;
+        taskCount: number;
     };
 }>();
 </script>
@@ -52,7 +54,7 @@ defineProps<{
             </div>
         </section>
 
-        <section class="grid gap-4 md:grid-cols-3">
+        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
                 <p class="text-sm text-muted-foreground">Team members</p>
                 <p class="mt-2 text-3xl font-semibold">{{ stats.memberCount }}</p>
@@ -69,6 +71,18 @@ defineProps<{
                 <p class="text-sm text-muted-foreground">Default dialing prefix</p>
                 <p class="mt-2 text-3xl font-semibold">{{ workspace.phoneCountryCode ?? 'N/A' }}</p>
                 <p class="mt-2 text-sm text-muted-foreground">Useful for telecalling and contact workflows.</p>
+            </div>
+
+            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
+                <p class="text-sm text-muted-foreground">Leads</p>
+                <p class="mt-2 text-3xl font-semibold">{{ stats.leadCount }}</p>
+                <p class="mt-2 text-sm text-muted-foreground">Current leads tracked inside this workspace.</p>
+            </div>
+
+            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
+                <p class="text-sm text-muted-foreground">Tasks</p>
+                <p class="mt-2 text-3xl font-semibold">{{ stats.taskCount }}</p>
+                <p class="mt-2 text-sm text-muted-foreground">Open workflow items for your current team.</p>
             </div>
         </section>
 

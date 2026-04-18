@@ -2,12 +2,14 @@
 
 namespace App\Actions\Tenants;
 
+use App\Models\LeadSource;
 use App\Models\SubscriptionPlan;
 use App\Models\Tenant;
 use App\Models\TenantSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class CreateTenantWorkspace
 {
@@ -42,6 +44,39 @@ class CreateTenantWorkspace
                 'is_primary' => true,
                 'joined_at' => now(),
                 'invited_by_user_id' => null,
+            ]);
+
+            Role::findOrCreate('tenant_admin', 'web');
+            $user->syncRoles(['tenant_admin']);
+
+            LeadSource::query()->insert([
+                [
+                    'tenant_id' => $tenant->id,
+                    'name' => 'Website',
+                    'slug' => 'website',
+                    'description' => 'Leads coming from the website or landing pages.',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'tenant_id' => $tenant->id,
+                    'name' => 'Facebook',
+                    'slug' => 'facebook',
+                    'description' => 'Leads coming from Facebook ads or messages.',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'tenant_id' => $tenant->id,
+                    'name' => 'Referral',
+                    'slug' => 'referral',
+                    'description' => 'Referral or word-of-mouth leads.',
+                    'is_active' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
             ]);
 
             $user->forceFill([
