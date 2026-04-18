@@ -17,7 +17,21 @@ class PermissionRegistry
             'leads.create',
             'tasks.view',
             'tasks.create',
+            'followups.view',
             'followups.create',
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function assignableTenantRoles(): array
+    {
+        return [
+            'tenant_admin',
+            'manager',
+            'sales_rep',
+            'telecaller',
         ];
     }
 
@@ -35,6 +49,7 @@ class PermissionRegistry
                 'leads.create',
                 'tasks.view',
                 'tasks.create',
+                'followups.view',
                 'followups.create',
             ],
             'manager' => [
@@ -43,6 +58,7 @@ class PermissionRegistry
                 'leads.create',
                 'tasks.view',
                 'tasks.create',
+                'followups.view',
                 'followups.create',
             ],
             'sales_rep' => [
@@ -50,12 +66,14 @@ class PermissionRegistry
                 'leads.create',
                 'tasks.view',
                 'tasks.create',
+                'followups.view',
                 'followups.create',
             ],
             'telecaller' => [
                 'leads.view',
                 'leads.create',
                 'tasks.view',
+                'followups.view',
                 'followups.create',
             ],
         ];

@@ -16,6 +16,7 @@ export type Auth = {
     context?: {
         isSuperAdmin: boolean;
         currentTenantRole: string | null;
+        permissions: string[];
     };
 };
 

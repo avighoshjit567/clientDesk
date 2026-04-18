@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import type { Auth } from '@/types';
 
 defineOptions({
     layout: {
@@ -46,6 +48,10 @@ const props = defineProps<{
         qualified: number;
     };
 }>();
+
+const page = usePage<{ auth: Auth }>();
+const permissions = computed(() => page.props.auth?.context?.permissions ?? []);
+const canCreateLeads = computed(() => permissions.value.includes('leads.create'));
 
 const leadForm = useForm({
     first_name: '',
@@ -116,6 +122,7 @@ const submitLeadSource = () => {
         <section class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
             <div class="space-y-6">
                 <form
+                    v-if="canCreateLeads"
                     class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border"
                     @submit.prevent="submitLead"
                 >
@@ -184,6 +191,10 @@ const submitLeadSource = () => {
                     </div>
                 </form>
 
+                <div v-else class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 text-sm text-muted-foreground dark:border-sidebar-border">
+                    Your current role can view leads, but cannot create new leads.
+                </div>
+
                 <div class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                     <div class="flex items-center justify-between gap-3">
                         <div>
@@ -226,7 +237,7 @@ const submitLeadSource = () => {
             </div>
 
             <div class="space-y-6">
-                <form class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitLeadSource">
+                <form v-if="canCreateLeads" class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitLeadSource">
                     <h2 class="text-lg font-semibold">Add lead source</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Track where leads are coming from.</p>
 
@@ -249,6 +260,10 @@ const submitLeadSource = () => {
                         </button>
                     </div>
                 </form>
+
+                <div v-else class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 text-sm text-muted-foreground dark:border-sidebar-border">
+                    Lead source setup is only available to roles that can create leads.
+                </div>
 
                 <div class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
                     <h2 class="text-lg font-semibold">Lead sources</h2>

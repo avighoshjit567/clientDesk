@@ -16,6 +16,8 @@ class LeadController extends Controller
 {
     public function index(): Response
     {
+        $this->authorize('viewAny', Lead::class);
+
         $tenantId = request()->user()->current_tenant_id;
 
         $leads = Lead::query()
@@ -62,6 +64,8 @@ class LeadController extends Controller
 
     public function store(StoreLeadRequest $request): RedirectResponse
     {
+        $this->authorize('create', Lead::class);
+
         $tenantId = $request->user()->current_tenant_id;
         $data = $request->validated();
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\PlatformRole;
+use App\Support\PermissionRegistry;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -116,5 +117,28 @@ class User extends Authenticatable
         $role = $this->currentTenantRole();
 
         return $role !== null && in_array($role, $roles, true);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function currentTenantPermissions(): array
+    {
+        if ($this->isSuperAdmin()) {
+            return PermissionRegistry::permissions();
+        }
+
+        $role = $this->currentTenantRole();
+
+        if ($role === null) {
+            return [];
+        }
+
+        return PermissionRegistry::rolePermissions()[$role] ?? [];
+    }
+
+    public function hasTenantPermission(string $permission): bool
+    {
+        return in_array($permission, $this->currentTenantPermissions(), true);
     }
 }

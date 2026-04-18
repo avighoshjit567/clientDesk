@@ -141,6 +141,31 @@ class TaskManagementTest extends TestCase
         ]);
     }
 
+    public function test_telecallers_cannot_create_tasks(): void
+    {
+        $user = User::factory()->create();
+        $tenant = $this->createWorkspaceForUser($user);
+        $lead = $this->createLeadForTenant($tenant, $user);
+
+        $tenant->users()->updateExistingPivot($user->id, [
+            'role' => 'telecaller',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('tasks.store'), [
+                'title' => 'This should fail',
+                'status' => TaskStatus::Pending->value,
+                'priority' => TaskPriority::Medium->value,
+                'lead_id' => $lead->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('tasks', [
+            'tenant_id' => $tenant->id,
+            'title' => 'This should fail',
+        ]);
+    }
+
     private function createWorkspaceForUser(User $user): Tenant
     {
         $plan = SubscriptionPlan::query()->create([

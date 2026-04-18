@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                 'context' => [
                     'isSuperAdmin' => $request->user()?->isSuperAdmin() ?? false,
                     'currentTenantRole' => $request->user()?->currentTenantRole(),
+                    'permissions' => $request->user()?->currentTenantPermissions() ?? [],
                 ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
