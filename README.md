@@ -59,6 +59,14 @@ npm run build
 php artisan boost:install
 ```
 
+For repeatable local validation on this host, you can also run:
+
+```bash
+./scripts/validate-local.sh
+```
+
+That script uses SQLite for local validation so migrations, tests, type-checking, lint, and build can be run in one command even when MySQL is not being used locally.
+
 ## Environment defaults
 
 - database: MySQL
@@ -66,6 +74,16 @@ php artisan boost:install
 
 ## Notes
 
-The current machine used for bootstrapping this repo does not have PHP or Composer installed, so the Laravel PHP dependency install and artisan setup could not be executed locally during the initial repository bootstrap.
+The repository was initially bootstrapped before PHP and Composer were available on this machine.
 
-Also note that this starter kit's frontend build uses Wayfinder generation during Vite build, which calls `php artisan wayfinder:generate --with-form`. That means a full `npm run build` validation also requires PHP to be available.
+That blocker has now been resolved on the current host, and the project has been validated locally with:
+
+- `composer install`
+- `php artisan key:generate`
+- SQLite-backed `php artisan migrate`
+- `php artisan test`
+- `npm run types:check`
+- `npm run lint:check`
+- `npm run build`
+
+This starter kit's frontend build uses Wayfinder generation during Vite build, which calls `php artisan wayfinder:generate --with-form`, so PHP availability is required for full frontend build validation.

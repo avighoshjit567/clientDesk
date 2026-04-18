@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\PlatformRole;
+use App\Support\PermissionRegistry;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -14,13 +15,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'phone', 'password', 'platform_role', 'current_tenant_id'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, TwoFactorAuthenticatable;
+
+    protected string $guard_name = 'web';
 
     /**
      * Get the attributes that should be cast.
@@ -57,5 +61,84 @@ class User extends Authenticatable
     public function sentTenantInvitations(): HasMany
     {
         return $this->hasMany(TenantInvitation::class, 'invited_by_user_id');
+    }
+
+    public function assignedLeads(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'assigned_to_user_id');
+    }
+
+    public function createdLeads(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'created_by_user_id');
+    }
+
+    public function assignedTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assigned_to_user_id');
+    }
+
+    public function createdTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'created_by_user_id');
+    }
+
+    public function assignedFollowUps(): HasMany
+    {
+        return $this->hasMany(FollowUp::class, 'assigned_to_user_id');
+    }
+
+    public function createdFollowUps(): HasMany
+    {
+        return $this->hasMany(FollowUp::class, 'created_by_user_id');
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->platform_role === PlatformRole::SuperAdmin || $this->hasRole('super_admin');
+    }
+
+    public function currentTenantRole(): ?string
+    {
+        if (! $this->current_tenant_id) {
+            return null;
+        }
+
+        return $this->tenants()
+            ->where('tenants.id', $this->current_tenant_id)
+            ->first()?->pivot?->role;
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     */
+    public function hasCurrentTenantRole(array $roles): bool
+    {
+        $role = $this->currentTenantRole();
+
+        return $role !== null && in_array($role, $roles, true);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function currentTenantPermissions(): array
+    {
+        if ($this->isSuperAdmin()) {
+            return PermissionRegistry::permissions();
+        }
+
+        $role = $this->currentTenantRole();
+
+        if ($role === null) {
+            return [];
+        }
+
+        return PermissionRegistry::rolePermissions()[$role] ?? [];
+    }
+
+    public function hasTenantPermission(string $permission): bool
+    {
+        return in_array($permission, $this->currentTenantPermissions(), true);
     }
 }
