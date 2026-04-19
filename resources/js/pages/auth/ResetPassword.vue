@@ -12,7 +12,7 @@ import { update } from '@/routes/password';
 defineOptions({
     layout: {
         title: 'Reset password',
-        description: 'Please enter your new password below',
+        description: 'Choose a new password to secure your ClientDesk account.',
     },
 });
 
@@ -32,56 +32,55 @@ const inputEmail = ref(props.email);
         :transform="(data) => ({ ...data, token, email })"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
+        class="space-y-5"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
-                <Label for="email">Email</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    autocomplete="email"
-                    v-model="inputEmail"
-                    class="mt-1 block w-full"
-                    readonly
-                />
-                <InputError :message="errors.email" class="mt-2" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="password">Password</Label>
-                <PasswordInput
-                    id="password"
-                    name="password"
-                    autocomplete="new-password"
-                    class="mt-1 block w-full"
-                    autofocus
-                    placeholder="Password"
-                />
-                <InputError :message="errors.password" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="password_confirmation"> Confirm password </Label>
-                <PasswordInput
-                    id="password_confirmation"
-                    name="password_confirmation"
-                    autocomplete="new-password"
-                    class="mt-1 block w-full"
-                    placeholder="Confirm password"
-                />
-                <InputError :message="errors.password_confirmation" />
-            </div>
-
-            <Button
-                type="submit"
-                class="mt-4 w-full"
-                :disabled="processing"
-                data-test="reset-password-button"
-            >
-                <Spinner v-if="processing" />
-                Reset password
-            </Button>
+        <div class="grid gap-2">
+            <Label for="email" class="text-sm font-medium">Email</Label>
+            <Input
+                id="email"
+                type="email"
+                name="email"
+                autocomplete="email"
+                v-model="inputEmail"
+                readonly
+                class="crm-input h-12"
+            />
+            <InputError :message="errors.email" />
         </div>
+
+        <div class="grid gap-2">
+            <Label for="password" class="text-sm font-medium">Password</Label>
+            <PasswordInput
+                id="password"
+                name="password"
+                autocomplete="new-password"
+                autofocus
+                placeholder="New password"
+                class="crm-input h-12"
+            />
+            <InputError :message="errors.password" />
+        </div>
+
+        <div class="grid gap-2">
+            <Label for="password_confirmation" class="text-sm font-medium">Confirm password</Label>
+            <PasswordInput
+                id="password_confirmation"
+                name="password_confirmation"
+                autocomplete="new-password"
+                placeholder="Confirm password"
+                class="crm-input h-12"
+            />
+            <InputError :message="errors.password_confirmation" />
+        </div>
+
+        <Button
+            type="submit"
+            class="crm-button-primary mt-2 h-12 w-full"
+            :disabled="processing"
+            data-test="reset-password-button"
+        >
+            <Spinner v-if="processing" />
+            Reset password
+        </Button>
     </Form>
 </template>
