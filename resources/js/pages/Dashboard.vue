@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import {
+    Activity,
+    ArrowRight,
+    BriefcaseBusiness,
+    CheckCircle2,
+    Clock3,
+    Target,
+    UserPlus,
+    Users,
+} from 'lucide-vue-next';
 
 defineOptions({
     layout: {
@@ -12,7 +22,7 @@ defineOptions({
     },
 });
 
-defineProps<{
+const props = defineProps<{
     workspace: {
         name: string;
         slug: string;
@@ -29,70 +39,222 @@ defineProps<{
         taskCount: number;
     };
 }>();
+
+const focusRows = [
+    {
+        title: 'Invite and activate the team',
+        value: props.stats.pendingInvitationCount,
+        description: 'Pending invites are the first friction point in most CRM rollouts.',
+        icon: UserPlus,
+        href: '/tenant-admin/team',
+    },
+    {
+        title: 'Own incoming opportunities',
+        value: props.stats.leadCount,
+        description: 'Keep fresh leads visible, assigned, and ready for follow-up.',
+        icon: Target,
+        href: '/leads',
+    },
+    {
+        title: 'Push execution forward',
+        value: props.stats.taskCount,
+        description: 'Tasks are where pipeline discipline becomes real execution.',
+        icon: BriefcaseBusiness,
+        href: '/tasks',
+    },
+];
 </script>
 
 <template>
     <Head title="Dashboard" />
 
-    <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        <section class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div>
-                    <p class="text-sm font-medium text-orange-500">ClientDesk workspace</p>
-                    <h1 class="mt-1 text-2xl font-semibold tracking-tight">{{ workspace.name }}</h1>
-                    <p class="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
-                        Your initial workspace foundation is ready. Next steps are team onboarding, role management,
-                        leads, and sales operations.
+    <div class="crm-page">
+        <section class="crm-hero">
+            <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                <div class="max-w-3xl">
+                    <p class="crm-eyebrow">Sales cockpit</p>
+                    <h1 class="crm-title">{{ props.workspace.name }}</h1>
+                    <p class="crm-subtitle">
+                        Reworked toward a more real CRM structure: a focused command area, activity-first priorities, and clearer paths into leads, tasks, and team operations.
                     </p>
+
+                    <div class="mt-5 flex flex-wrap gap-2">
+                        <span class="crm-chip crm-chip-success">{{ props.workspace.status }}</span>
+                        <span class="crm-chip crm-chip-muted">{{ props.workspace.plan ?? 'No plan assigned' }}</span>
+                        <span class="crm-chip crm-chip-muted">{{ props.workspace.timezone }}</span>
+                        <span class="crm-chip crm-chip-muted">{{ props.workspace.slug }}</span>
+                    </div>
                 </div>
 
-                <div class="rounded-xl border border-sidebar-border/70 px-4 py-3 text-sm dark:border-sidebar-border">
-                    <p><span class="font-medium">Plan:</span> {{ workspace.plan ?? 'Not assigned' }}</p>
-                    <p class="mt-1"><span class="font-medium">Timezone:</span> {{ workspace.timezone }}</p>
-                    <p class="mt-1"><span class="font-medium">Slug:</span> {{ workspace.slug }}</p>
+                <div class="grid gap-3 sm:grid-cols-2 xl:w-[380px]">
+                    <Link href="/leads" class="crm-button-primary h-12">
+                        Open leads
+                        <ArrowRight class="size-4" />
+                    </Link>
+                    <Link href="/tasks" class="crm-button-secondary h-12">Open tasks</Link>
+                    <div class="crm-card-soft sm:col-span-2">
+                        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Workspace control</p>
+                        <div class="mt-3 grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
+                            <div>
+                                <p class="font-medium text-foreground">Currency</p>
+                                <p class="mt-1">{{ props.workspace.currencyCode ?? 'Not set' }}</p>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Dialing code</p>
+                                <p class="mt-1">{{ props.workspace.phoneCountryCode ?? 'Not set' }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Team members</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.memberCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Current users attached to this tenant workspace.</p>
-            </div>
+        <section class="crm-stat-grid">
+            <article class="crm-stat-card">
+                <div class="crm-stat-icon">
+                    <Users class="size-5" />
+                </div>
+                <p class="crm-stat-label">Team coverage</p>
+                <p class="crm-stat-value">{{ props.stats.memberCount }}</p>
+                <p class="crm-stat-caption">People currently inside the workspace and able to act.</p>
+            </article>
 
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Pending invitations</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.pendingInvitationCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Outstanding invites waiting for team members.</p>
-            </div>
+            <article class="crm-stat-card">
+                <div class="crm-stat-icon">
+                    <UserPlus class="size-5" />
+                </div>
+                <p class="crm-stat-label">Activation queue</p>
+                <p class="crm-stat-value">{{ props.stats.pendingInvitationCount }}</p>
+                <p class="crm-stat-caption">Pending invitations still blocking full team readiness.</p>
+            </article>
 
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Default dialing prefix</p>
-                <p class="mt-2 text-3xl font-semibold">{{ workspace.phoneCountryCode ?? 'N/A' }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Useful for telecalling and contact workflows.</p>
-            </div>
+            <article class="crm-stat-card">
+                <div class="crm-stat-icon">
+                    <Target class="size-5" />
+                </div>
+                <p class="crm-stat-label">Open opportunities</p>
+                <p class="crm-stat-value">{{ props.stats.leadCount }}</p>
+                <p class="crm-stat-caption">Lead volume that needs ownership and fast response.</p>
+            </article>
 
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Leads</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.leadCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Current leads tracked inside this workspace.</p>
-            </div>
-
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Tasks</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.taskCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Open workflow items for your current team.</p>
-            </div>
+            <article class="crm-stat-card">
+                <div class="crm-stat-icon">
+                    <Activity class="size-5" />
+                </div>
+                <p class="crm-stat-label">Execution load</p>
+                <p class="crm-stat-value">{{ props.stats.taskCount }}</p>
+                <p class="crm-stat-caption">Current task pressure across the sales workflow.</p>
+            </article>
         </section>
 
-        <section class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-            <h2 class="text-lg font-semibold">What comes next</h2>
-            <ul class="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
-                <li>Set up tenant onboarding completion flow and workspace switching.</li>
-                <li>Add role and permission layers for tenant admins, managers, and sales reps.</li>
-                <li>Build CRM modules for leads, follow-ups, tasks, and call activity.</li>
-            </ul>
+        <section class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <article class="crm-card">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <h2 class="crm-panel-title">Today’s focus queue</h2>
+                        <p class="crm-panel-copy">Borrowing from stronger CRM patterns, this puts the next actions ahead of decorative panels.</p>
+                    </div>
+                    <Clock3 class="size-5 text-orange-500" />
+                </div>
+
+                <div class="mt-5 space-y-4">
+                    <Link
+                        v-for="row in focusRows"
+                        :key="row.title"
+                        :href="row.href"
+                        class="block rounded-2xl border border-border/60 bg-background/70 p-4 transition hover:border-orange-300 hover:bg-background"
+                    >
+                        <div class="flex items-start gap-4">
+                            <div class="crm-stat-icon size-12 shrink-0">
+                                <component :is="row.icon" class="size-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <p class="text-sm font-semibold text-foreground">{{ row.title }}</p>
+                                    <span class="crm-chip crm-chip-muted">{{ row.value }}</span>
+                                </div>
+                                <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                                    {{ row.description }}
+                                </p>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+            </article>
+
+            <article class="crm-card">
+                <h2 class="crm-panel-title">Workspace health</h2>
+                <p class="crm-panel-copy">A small operator rail, similar to what good CRM command centers keep in view.</p>
+
+                <div class="mt-5 space-y-3">
+                    <div class="crm-card-soft">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-sm font-medium text-foreground">Workspace status</p>
+                            <span class="crm-chip crm-chip-success">{{ props.workspace.status }}</span>
+                        </div>
+                        <p class="mt-2 text-sm text-muted-foreground">The workspace is live and ready for real usage.</p>
+                    </div>
+                    <div class="crm-card-soft">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-sm font-medium text-foreground">Plan</p>
+                            <span class="crm-chip crm-chip-muted">{{ props.workspace.plan ?? 'None' }}</span>
+                        </div>
+                        <p class="mt-2 text-sm text-muted-foreground">Keep pricing and limits visible as the product matures.</p>
+                    </div>
+                    <div class="crm-card-soft">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-sm font-medium text-foreground">Timezone</p>
+                            <span class="crm-chip crm-chip-muted">{{ props.workspace.timezone }}</span>
+                        </div>
+                        <p class="mt-2 text-sm text-muted-foreground">Important for future reminders, call schedules, and follow-up timing.</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+            <article class="crm-card">
+                <h2 class="crm-panel-title">Pipeline operating notes</h2>
+                <p class="crm-panel-copy">A more CRM-native framing of what this team should do next.</p>
+
+                <div class="mt-5 space-y-3">
+                    <div class="crm-list-dot">Finish workspace activation first, because unused invites slow everything else down.</div>
+                    <div class="crm-list-dot">Keep leads assigned early so the team knows exactly who owns the next conversation.</div>
+                    <div class="crm-list-dot">Use tasks as the daily execution layer, not just as a passive list.</div>
+                </div>
+            </article>
+
+            <article class="crm-card">
+                <h2 class="crm-panel-title">Execution snapshot</h2>
+                <p class="crm-panel-copy">A compact board, inspired by activity-first CRMs rather than starter dashboards.</p>
+
+                <div class="mt-5 grid gap-4 md:grid-cols-3">
+                    <div class="crm-card-soft">
+                        <div class="flex items-center gap-2 text-sm font-semibold text-foreground">
+                            <CheckCircle2 class="size-4 text-emerald-500" />
+                            Team ready
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold tracking-tight text-foreground">{{ props.stats.memberCount }}</p>
+                        <p class="mt-2 text-sm leading-6 text-muted-foreground">Active members available to work the pipeline.</p>
+                    </div>
+                    <div class="crm-card-soft">
+                        <div class="flex items-center gap-2 text-sm font-semibold text-foreground">
+                            <Target class="size-4 text-orange-500" />
+                            Lead queue
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold tracking-tight text-foreground">{{ props.stats.leadCount }}</p>
+                        <p class="mt-2 text-sm leading-6 text-muted-foreground">Open opportunities waiting for structure and follow-up.</p>
+                    </div>
+                    <div class="crm-card-soft">
+                        <div class="flex items-center gap-2 text-sm font-semibold text-foreground">
+                            <BriefcaseBusiness class="size-4 text-blue-500" />
+                            Work in motion
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold tracking-tight text-foreground">{{ props.stats.taskCount }}</p>
+                        <p class="mt-2 text-sm leading-6 text-muted-foreground">Action items currently driving the pipeline forward.</p>
+                    </div>
+                </div>
+            </article>
         </section>
     </div>
 </template>
