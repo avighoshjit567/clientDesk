@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
-import { BellDot, ShieldCheck } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BellDot, CalendarClock, Search, ShieldCheck, Sparkles } from 'lucide-vue-next';
 import { computed } from 'vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -43,13 +43,27 @@ const greeting = computed(() => {
         return 'Welcome back';
     }
 
-    return `Welcome back, ${name.split(' ')[0]}`;
+    return `Good to see you, ${name.split(' ')[0]}`;
+});
+
+const primaryAction = computed(() => {
+    const permissions = page.props.auth?.context?.permissions ?? [];
+
+    if (permissions.includes('leads.view')) {
+        return { label: 'Open leads', href: '/leads' };
+    }
+
+    if (permissions.includes('tasks.view')) {
+        return { label: 'Open tasks', href: '/tasks' };
+    }
+
+    return { label: 'View team', href: '/tenant-admin/team' };
 });
 </script>
 
 <template>
     <header class="sticky top-0 z-10 border-b border-border/50 bg-background/80 px-4 py-4 backdrop-blur-xl md:px-6">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div class="flex min-w-0 items-start gap-3">
                 <SidebarTrigger class="mt-0.5 rounded-xl border border-border/60 bg-card/70 p-2 shadow-sm hover:bg-accent md:mt-1" />
 
@@ -66,15 +80,33 @@ const greeting = computed(() => {
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 md:justify-end">
-                <span class="crm-chip crm-chip-muted">
-                    <ShieldCheck class="size-3.5" />
-                    {{ roleLabel }}
-                </span>
-                <span class="crm-chip crm-chip-success">
-                    <BellDot class="size-3.5" />
-                    Workspace live
-                </span>
+            <div class="flex flex-1 flex-col gap-3 xl:max-w-3xl xl:flex-row xl:items-center xl:justify-end">
+                <div class="flex min-w-0 items-center gap-3 rounded-2xl border border-border/60 bg-card/70 px-4 py-3 shadow-sm xl:min-w-[320px] xl:flex-1">
+                    <Search class="size-4 text-muted-foreground" />
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-foreground">Search leads, tasks, or teammates</p>
+                        <p class="truncate text-xs text-muted-foreground">Command-style search surface, coming next</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 xl:justify-end">
+                    <Link :href="primaryAction.href" class="crm-button-primary h-11 px-4 py-0">
+                        <Sparkles class="size-4" />
+                        {{ primaryAction.label }}
+                    </Link>
+                    <span class="crm-chip crm-chip-muted h-11 px-4">
+                        <ShieldCheck class="size-3.5" />
+                        {{ roleLabel }}
+                    </span>
+                    <span class="crm-chip crm-chip-success h-11 px-4">
+                        <BellDot class="size-3.5" />
+                        Workspace live
+                    </span>
+                    <span class="crm-chip crm-chip-muted h-11 px-4">
+                        <CalendarClock class="size-3.5" />
+                        Daily focus
+                    </span>
+                </div>
             </div>
         </div>
     </header>
