@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 import InputError from '@/components/InputError.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import Pagination, { type PaginationLink } from '@/components/Pagination.vue';
 import SelectInput from '@/components/SelectInput.vue';
 import StatCard from '@/components/StatCard.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
@@ -50,8 +51,17 @@ interface FollowUpRow {
     notes: string | null;
 }
 
+interface TaskOption {
+    id: number;
+    title: string;
+}
+
 const props = defineProps<{
-    tasks: TaskRow[];
+    tasks: {
+        data: TaskRow[];
+        links: PaginationLink[];
+    };
+    taskOptions: TaskOption[];
     followUps: FollowUpRow[];
     teamMembers: NamedOption[];
     leads: NamedOption[];
@@ -207,7 +217,8 @@ const submitFollowUp = () => {
                     <h2 class="text-lg font-semibold">Task list</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Open and recent tasks in this workspace.</p>
 
-                    <div class="mt-5 overflow-x-auto">
+                    <!-- Desktop table -->
+                    <div class="mt-5 hidden overflow-x-auto md:block">
                         <table class="min-w-full text-left text-sm">
                             <thead class="border-b border-border text-muted-foreground">
                                 <tr>
@@ -219,7 +230,7 @@ const submitFollowUp = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="task in tasks" :key="task.id" class="border-b border-border/50 transition hover:bg-muted/50">
+                                <tr v-for="task in tasks.data" :key="task.id" class="border-b border-border/50 transition hover:bg-muted/50">
                                     <td class="px-3 py-3">
                                         <div class="font-medium">{{ task.title }}</div>
                                         <div class="text-xs text-muted-foreground">{{ task.dueAt || 'No due date' }}</div>
@@ -229,7 +240,7 @@ const submitFollowUp = () => {
                                     <td class="px-3 py-3">{{ task.leadName || 'None' }}</td>
                                     <td class="px-3 py-3">{{ task.assignedTo || 'Unassigned' }}</td>
                                 </tr>
-                                <tr v-if="tasks.length === 0">
+                                <tr v-if="tasks.data.length === 0">
                                     <td colspan="5" class="px-3 py-10 text-center text-muted-foreground">
                                         No tasks yet. Create the first one from the form above.
                                     </td>
@@ -237,6 +248,38 @@ const submitFollowUp = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile cards -->
+                    <div class="mt-5 space-y-3 md:hidden">
+                        <div v-for="task in tasks.data" :key="task.id" class="rounded-xl border border-border p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="font-medium">{{ task.title }}</div>
+                                    <div class="mt-0.5 text-xs text-muted-foreground">{{ task.dueAt || 'No due date' }}</div>
+                                </div>
+                                <StatusBadge :status="task.status" />
+                            </div>
+                            <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <dt class="text-xs text-muted-foreground">Priority</dt>
+                                    <dd class="capitalize">{{ task.priority }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-muted-foreground">Lead</dt>
+                                    <dd>{{ task.leadName || 'None' }}</dd>
+                                </div>
+                                <div class="col-span-2">
+                                    <dt class="text-xs text-muted-foreground">Assigned</dt>
+                                    <dd>{{ task.assignedTo || 'Unassigned' }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div v-if="tasks.data.length === 0" class="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                            No tasks yet. Create the first one from the form above.
+                        </div>
+                    </div>
+
+                    <Pagination :links="tasks.links" />
                 </div>
             </div>
 
@@ -268,7 +311,7 @@ const submitFollowUp = () => {
                             <Label for="followup-task">Related task</Label>
                             <SelectInput id="followup-task" v-model="followUpForm.task_id">
                                 <option value="">None</option>
-                                <option v-for="task in tasks" :key="task.id" :value="String(task.id)">{{ task.title }}</option>
+                                <option v-for="task in taskOptions" :key="task.id" :value="String(task.id)">{{ task.title }}</option>
                             </SelectInput>
                         </div>
                         <div class="grid gap-2">

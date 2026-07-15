@@ -189,7 +189,44 @@ const copyInviteLink = async (link: string) => {
             <h2 class="text-lg font-semibold">Current team</h2>
             <p class="mt-1 text-sm text-muted-foreground">Manage roles and access for everyone in this workspace.</p>
 
-            <div class="mt-5 overflow-x-auto">
+            <!-- Mobile cards -->
+            <div class="mt-5 space-y-3 md:hidden">
+                <div v-for="member in team" :key="member.id" class="rounded-xl border border-border p-4">
+                    <div class="font-medium">{{ member.name }}</div>
+                    <div class="mt-0.5 text-xs text-muted-foreground">
+                        {{ member.isOwner ? 'Owner' : member.isPrimary ? 'Primary member' : 'Member' }} · {{ member.email }}
+                    </div>
+                    <div class="mt-3 grid gap-2">
+                        <SelectInput
+                            :model-value="member.role"
+                            class="capitalize"
+                            :disabled="member.isOwner"
+                            :aria-label="`Role for ${member.name}`"
+                            @change="updateRoleFromEvent(member.id, $event)"
+                        >
+                            <option v-for="role in roleOptions" :key="role" :value="role">{{ role.replaceAll('_', ' ') }}</option>
+                        </SelectInput>
+                        <div class="flex items-center justify-between text-sm text-muted-foreground">
+                            <span>Joined: {{ member.joinedAt || 'Recently added' }}</span>
+                            <ConfirmDialog
+                                v-if="!member.isOwner"
+                                title="Remove team member?"
+                                :description="`${member.name} will lose access to this workspace. This cannot be undone.`"
+                                confirm-label="Remove"
+                                @confirm="removeMember(member.id)"
+                            >
+                                <Button variant="ghost" size="sm" class="text-destructive hover:text-destructive">Remove</Button>
+                            </ConfirmDialog>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="team.length === 0" class="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                    No team members yet.
+                </div>
+            </div>
+
+            <!-- Desktop table -->
+            <div class="mt-5 hidden overflow-x-auto md:block">
                 <table class="min-w-full text-left text-sm">
                     <thead class="border-b border-border text-muted-foreground">
                         <tr>
