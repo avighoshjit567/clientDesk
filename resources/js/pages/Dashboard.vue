@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { CalendarCheck, Mail, Phone, Users, UsersRound } from 'lucide-vue-next';
+import PageHeader from '@/components/PageHeader.vue';
+import StatCard from '@/components/StatCard.vue';
+import StatusBadge from '@/components/StatusBadge.vue';
 
 defineOptions({
     layout: {
@@ -34,65 +38,77 @@ defineProps<{
 <template>
     <Head title="Dashboard" />
 
-    <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        <section class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-            <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div>
-                    <p class="text-sm font-medium text-orange-500">ClientDesk workspace</p>
-                    <h1 class="mt-1 text-2xl font-semibold tracking-tight">{{ workspace.name }}</h1>
-                    <p class="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
-                        Your initial workspace foundation is ready. Next steps are team onboarding, role management,
-                        leads, and sales operations.
-                    </p>
+    <div class="flex h-full flex-1 flex-col gap-6 p-4">
+        <PageHeader
+            eyebrow="Workspace"
+            :title="workspace.name"
+            description="A quick overview of your team, leads, and open work in this workspace."
+        >
+            <template #aside>
+                <div class="flex shrink-0 flex-col gap-2 rounded-xl border border-border px-4 py-3 text-sm">
+                    <div class="flex items-center justify-between gap-6">
+                        <span class="text-muted-foreground">Plan</span>
+                        <span class="font-medium">{{ workspace.plan ?? 'Not assigned' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-6">
+                        <span class="text-muted-foreground">Timezone</span>
+                        <span class="font-medium">{{ workspace.timezone }}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-6">
+                        <span class="text-muted-foreground">Status</span>
+                        <StatusBadge :status="workspace.status" />
+                    </div>
                 </div>
-
-                <div class="rounded-xl border border-sidebar-border/70 px-4 py-3 text-sm dark:border-sidebar-border">
-                    <p><span class="font-medium">Plan:</span> {{ workspace.plan ?? 'Not assigned' }}</p>
-                    <p class="mt-1"><span class="font-medium">Timezone:</span> {{ workspace.timezone }}</p>
-                    <p class="mt-1"><span class="font-medium">Slug:</span> {{ workspace.slug }}</p>
-                </div>
-            </div>
-        </section>
+            </template>
+        </PageHeader>
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Team members</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.memberCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Current users attached to this tenant workspace.</p>
-            </div>
-
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Pending invitations</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.pendingInvitationCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Outstanding invites waiting for team members.</p>
-            </div>
-
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Default dialing prefix</p>
-                <p class="mt-2 text-3xl font-semibold">{{ workspace.phoneCountryCode ?? 'N/A' }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Useful for telecalling and contact workflows.</p>
-            </div>
-
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Leads</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.leadCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Current leads tracked inside this workspace.</p>
-            </div>
-
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Tasks</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.taskCount }}</p>
-                <p class="mt-2 text-sm text-muted-foreground">Open workflow items for your current team.</p>
-            </div>
+            <StatCard
+                label="Team members"
+                :value="stats.memberCount"
+                hint="Users attached to this workspace."
+                :icon="Users"
+            />
+            <StatCard
+                label="Pending invitations"
+                :value="stats.pendingInvitationCount"
+                hint="Invites waiting to be accepted."
+                :icon="Mail"
+            />
+            <StatCard
+                label="Leads"
+                :value="stats.leadCount"
+                hint="Leads tracked in this workspace."
+                :icon="UsersRound"
+            />
+            <StatCard
+                label="Tasks"
+                :value="stats.taskCount"
+                hint="Open work items for your team."
+                :icon="CalendarCheck"
+            />
         </section>
 
-        <section class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-            <h2 class="text-lg font-semibold">What comes next</h2>
-            <ul class="mt-4 space-y-3 text-sm leading-7 text-muted-foreground">
-                <li>Set up tenant onboarding completion flow and workspace switching.</li>
-                <li>Add role and permission layers for tenant admins, managers, and sales reps.</li>
-                <li>Build CRM modules for leads, follow-ups, tasks, and call activity.</li>
-            </ul>
+        <section class="rounded-2xl border border-border bg-card p-6">
+            <h2 class="text-lg font-semibold">Workspace details</h2>
+            <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-xl border border-border p-4">
+                    <dt class="text-muted-foreground">Workspace slug</dt>
+                    <dd class="mt-1 font-medium">{{ workspace.slug }}</dd>
+                </div>
+                <div class="rounded-xl border border-border p-4">
+                    <dt class="text-muted-foreground">Currency</dt>
+                    <dd class="mt-1 font-medium">{{ workspace.currencyCode ?? 'Not set' }}</dd>
+                </div>
+                <div class="rounded-xl border border-border p-4">
+                    <dt class="flex items-center gap-1.5 text-muted-foreground"><Phone class="h-3.5 w-3.5" /> Dialing prefix</dt>
+                    <dd class="mt-1 font-medium">{{ workspace.phoneCountryCode ?? 'Not set' }}</dd>
+                </div>
+                <div class="rounded-xl border border-border p-4">
+                    <dt class="text-muted-foreground">Timezone</dt>
+                    <dd class="mt-1 font-medium">{{ workspace.timezone }}</dd>
+                </div>
+            </dl>
         </section>
     </div>
 </template>
