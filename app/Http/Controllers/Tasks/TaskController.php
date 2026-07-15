@@ -27,8 +27,9 @@ class TaskController extends Controller
             ->where('tenant_id', $tenantId)
             ->with(['lead:id,first_name,last_name', 'assignedTo:id,name'])
             ->latest()
-            ->get()
-            ->map(fn (Task $task) => [
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn (Task $task) => [
                 'id' => $task->id,
                 'title' => $task->title,
                 'status' => $task->status?->value,
@@ -53,6 +54,11 @@ class TaskController extends Controller
                 'notes' => $followUp->notes,
             ]);
 
+        $taskOptions = Task::query()
+            ->where('tenant_id', $tenantId)
+            ->latest()
+            ->get(['id', 'title']);
+
         $teamMembers = User::query()
             ->select('users.id', 'users.name')
             ->join('tenant_user', 'tenant_user.user_id', '=', 'users.id')
@@ -71,6 +77,7 @@ class TaskController extends Controller
 
         return Inertia::render('tasks/Index', [
             'tasks' => $tasks,
+            'taskOptions' => $taskOptions,
             'followUps' => $followUps,
             'teamMembers' => $teamMembers,
             'leads' => $leads,

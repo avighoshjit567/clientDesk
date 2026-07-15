@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 import InputError from '@/components/InputError.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import Pagination, { type PaginationLink } from '@/components/Pagination.vue';
 import SelectInput from '@/components/SelectInput.vue';
 import StatCard from '@/components/StatCard.vue';
 import StatusBadge from '@/components/StatusBadge.vue';
@@ -48,7 +49,10 @@ interface TeamMemberOption {
 }
 
 const props = defineProps<{
-    leads: LeadRow[];
+    leads: {
+        data: LeadRow[];
+        links: PaginationLink[];
+    };
     leadSources: LeadSourceOption[];
     teamMembers: TeamMemberOption[];
     leadStatusOptions: string[];
@@ -204,7 +208,8 @@ const submitLeadSource = () => {
                     <h2 class="text-lg font-semibold">Recent leads</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Newest leads in the current tenant workspace.</p>
 
-                    <div class="mt-5 overflow-x-auto">
+                    <!-- Desktop table -->
+                    <div class="mt-5 hidden overflow-x-auto md:block">
                         <table class="min-w-full text-left text-sm">
                             <thead class="border-b border-border text-muted-foreground">
                                 <tr>
@@ -216,7 +221,7 @@ const submitLeadSource = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="lead in leads" :key="lead.id" class="border-b border-border/50 transition hover:bg-muted/50">
+                                <tr v-for="lead in leads.data" :key="lead.id" class="border-b border-border/50 transition hover:bg-muted/50">
                                     <td class="px-3 py-3">
                                         <div class="font-medium">{{ lead.name }}</div>
                                         <div class="text-xs text-muted-foreground">{{ lead.email || 'No email' }}</div>
@@ -226,7 +231,7 @@ const submitLeadSource = () => {
                                     <td class="px-3 py-3">{{ lead.source || 'Direct' }}</td>
                                     <td class="px-3 py-3">{{ lead.assignedTo || 'Unassigned' }}</td>
                                 </tr>
-                                <tr v-if="leads.length === 0">
+                                <tr v-if="leads.data.length === 0">
                                     <td colspan="5" class="px-3 py-10 text-center text-muted-foreground">
                                         No leads yet. Create the first one from the form above.
                                     </td>
@@ -234,6 +239,38 @@ const submitLeadSource = () => {
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Mobile cards -->
+                    <div class="mt-5 space-y-3 md:hidden">
+                        <div v-for="lead in leads.data" :key="lead.id" class="rounded-xl border border-border p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <div class="font-medium">{{ lead.name }}</div>
+                                    <div class="mt-0.5 text-xs text-muted-foreground">{{ lead.email || 'No email' }}</div>
+                                </div>
+                                <StatusBadge :status="lead.status" />
+                            </div>
+                            <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                                <div>
+                                    <dt class="text-xs text-muted-foreground">Phone</dt>
+                                    <dd>{{ lead.primaryPhone }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs text-muted-foreground">Source</dt>
+                                    <dd>{{ lead.source || 'Direct' }}</dd>
+                                </div>
+                                <div class="col-span-2">
+                                    <dt class="text-xs text-muted-foreground">Assigned</dt>
+                                    <dd>{{ lead.assignedTo || 'Unassigned' }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div v-if="leads.data.length === 0" class="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                            No leads yet. Create the first one from the form above.
+                        </div>
+                    </div>
+
+                    <Pagination :links="leads.links" />
                 </div>
             </div>
 

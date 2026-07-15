@@ -24,8 +24,9 @@ class LeadController extends Controller
             ->where('tenant_id', $tenantId)
             ->with(['source:id,name', 'assignedTo:id,name'])
             ->latest()
-            ->get()
-            ->map(fn (Lead $lead) => [
+            ->paginate(10)
+            ->withQueryString()
+            ->through(fn (Lead $lead) => [
                 'id' => $lead->id,
                 'name' => $lead->full_name,
                 'email' => $lead->email,

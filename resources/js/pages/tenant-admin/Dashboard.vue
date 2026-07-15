@@ -56,7 +56,20 @@ defineProps<{
                 <p class="mt-1 text-sm text-muted-foreground">Everyone with access to this workspace.</p>
             </div>
 
-            <div class="mt-5 overflow-x-auto">
+            <!-- Mobile cards -->
+            <div class="mt-5 space-y-3 md:hidden">
+                <div v-for="member in team" :key="member.id" class="rounded-xl border border-border p-4">
+                    <div class="font-medium">{{ member.name }}</div>
+                    <div class="mt-0.5 text-xs text-muted-foreground">{{ member.email }}</div>
+                    <div class="mt-2 text-sm capitalize text-muted-foreground">{{ member.role.replaceAll('_', ' ') }}</div>
+                </div>
+                <div v-if="team.length === 0" class="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                    No team members yet. Invite teammates from the Team page.
+                </div>
+            </div>
+
+            <!-- Desktop table -->
+            <div class="mt-5 hidden overflow-x-auto md:block">
                 <table class="min-w-full text-left text-sm">
                     <thead class="border-b border-border text-muted-foreground">
                         <tr>
