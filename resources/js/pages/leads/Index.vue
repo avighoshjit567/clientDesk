@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { CheckCircle2, PhoneCall, Sparkles, UsersRound } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { toast } from 'vue-sonner';
+import InputError from '@/components/InputError.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import SelectInput from '@/components/SelectInput.vue';
+import StatCard from '@/components/StatCard.vue';
+import StatusBadge from '@/components/StatusBadge.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import type { Auth } from '@/types';
 
 defineOptions({
@@ -76,14 +87,20 @@ const submitLead = () => {
         assigned_to_user_id: data.assigned_to_user_id || null,
     })).post('/leads', {
         preserveScroll: true,
-        onSuccess: () => leadForm.reset('first_name', 'last_name', 'email', 'primary_phone', 'notes'),
+        onSuccess: () => {
+            leadForm.reset('first_name', 'last_name', 'email', 'primary_phone', 'notes');
+            toast.success('Lead created');
+        },
     });
 };
 
 const submitLeadSource = () => {
     leadSourceForm.post('/lead-sources', {
         preserveScroll: true,
-        onSuccess: () => leadSourceForm.reset(),
+        onSuccess: () => {
+            leadSourceForm.reset();
+            toast.success('Lead source added');
+        },
     });
 };
 </script>
@@ -91,121 +108,105 @@ const submitLeadSource = () => {
 <template>
     <Head title="Leads" />
 
-    <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
-        <section class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-            <p class="text-sm font-medium text-orange-500">Phase 2 CRM core</p>
-            <h1 class="mt-1 text-2xl font-semibold tracking-tight">Lead management foundation</h1>
-            <p class="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                Start capturing leads, tagging their source, and assigning ownership inside the current workspace.
-            </p>
-        </section>
+    <div class="flex h-full flex-1 flex-col gap-6 p-4">
+        <PageHeader
+            eyebrow="CRM"
+            title="Leads"
+            description="Capture leads, tag their source, and assign ownership inside the current workspace."
+        />
 
         <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Total leads</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.total }}</p>
-            </div>
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">New</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.new }}</p>
-            </div>
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Contacted</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.contacted }}</p>
-            </div>
-            <div class="rounded-2xl border border-sidebar-border/70 bg-background p-5 dark:border-sidebar-border">
-                <p class="text-sm text-muted-foreground">Qualified</p>
-                <p class="mt-2 text-3xl font-semibold">{{ stats.qualified }}</p>
-            </div>
+            <StatCard label="Total leads" :value="stats.total" :icon="UsersRound" />
+            <StatCard label="New" :value="stats.new" :icon="Sparkles" />
+            <StatCard label="Contacted" :value="stats.contacted" :icon="PhoneCall" />
+            <StatCard label="Qualified" :value="stats.qualified" :icon="CheckCircle2" />
         </section>
 
         <section class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
             <div class="space-y-6">
                 <form
                     v-if="canCreateLeads"
-                    class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border"
+                    class="rounded-2xl border border-border bg-card p-6"
                     @submit.prevent="submitLead"
                 >
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <h2 class="text-lg font-semibold">Create lead</h2>
-                            <p class="mt-1 text-sm text-muted-foreground">Add a lead and assign it to your team.</p>
-                        </div>
-                    </div>
+                    <h2 class="text-lg font-semibold">Create lead</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Add a lead and assign it to your team.</p>
 
                     <div class="mt-5 grid gap-5 md:grid-cols-2">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">First name</label>
-                            <input v-model="leadForm.first_name" type="text" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500" />
-                            <p v-if="leadForm.errors.first_name" class="mt-2 text-sm text-red-500">{{ leadForm.errors.first_name }}</p>
+                        <div class="grid gap-2">
+                            <Label for="lead-first-name">First name</Label>
+                            <Input id="lead-first-name" v-model="leadForm.first_name" type="text" required :aria-invalid="Boolean(leadForm.errors.first_name)" />
+                            <InputError :message="leadForm.errors.first_name" />
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Last name</label>
-                            <input v-model="leadForm.last_name" type="text" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500" />
-                            <p v-if="leadForm.errors.last_name" class="mt-2 text-sm text-red-500">{{ leadForm.errors.last_name }}</p>
+                        <div class="grid gap-2">
+                            <Label for="lead-last-name">Last name</Label>
+                            <Input id="lead-last-name" v-model="leadForm.last_name" type="text" :aria-invalid="Boolean(leadForm.errors.last_name)" />
+                            <InputError :message="leadForm.errors.last_name" />
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Phone</label>
-                            <input v-model="leadForm.primary_phone" type="text" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500" />
-                            <p v-if="leadForm.errors.primary_phone" class="mt-2 text-sm text-red-500">{{ leadForm.errors.primary_phone }}</p>
+                        <div class="grid gap-2">
+                            <Label for="lead-phone">Phone</Label>
+                            <Input id="lead-phone" v-model="leadForm.primary_phone" type="text" required :aria-invalid="Boolean(leadForm.errors.primary_phone)" />
+                            <InputError :message="leadForm.errors.primary_phone" />
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Email</label>
-                            <input v-model="leadForm.email" type="email" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500" />
-                            <p v-if="leadForm.errors.email" class="mt-2 text-sm text-red-500">{{ leadForm.errors.email }}</p>
+                        <div class="grid gap-2">
+                            <Label for="lead-email">Email</Label>
+                            <Input id="lead-email" v-model="leadForm.email" type="email" :aria-invalid="Boolean(leadForm.errors.email)" />
+                            <InputError :message="leadForm.errors.email" />
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Status</label>
-                            <select v-model="leadForm.status" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500">
+                        <div class="grid gap-2">
+                            <Label for="lead-status">Status</Label>
+                            <SelectInput id="lead-status" v-model="leadForm.status">
                                 <option v-for="status in leadStatusOptions" :key="status" :value="status">{{ status }}</option>
-                            </select>
-                            <p v-if="leadForm.errors.status" class="mt-2 text-sm text-red-500">{{ leadForm.errors.status }}</p>
+                            </SelectInput>
+                            <InputError :message="leadForm.errors.status" />
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Lead source</label>
-                            <select v-model="leadForm.lead_source_id" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500">
+                        <div class="grid gap-2">
+                            <Label for="lead-source">Lead source</Label>
+                            <SelectInput id="lead-source" v-model="leadForm.lead_source_id">
                                 <option value="">None</option>
                                 <option v-for="source in leadSources" :key="source.id" :value="String(source.id)">{{ source.name }}</option>
-                            </select>
-                            <p v-if="leadForm.errors.lead_source_id" class="mt-2 text-sm text-red-500">{{ leadForm.errors.lead_source_id }}</p>
+                            </SelectInput>
+                            <InputError :message="leadForm.errors.lead_source_id" />
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="mb-2 block text-sm font-medium">Assign to</label>
-                            <select v-model="leadForm.assigned_to_user_id" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500">
+                        <div class="grid gap-2 md:col-span-2">
+                            <Label for="lead-assignee">Assign to</Label>
+                            <SelectInput id="lead-assignee" v-model="leadForm.assigned_to_user_id">
                                 <option value="">Unassigned</option>
                                 <option v-for="member in teamMembers" :key="member.id" :value="String(member.id)">{{ member.name }}</option>
-                            </select>
-                            <p v-if="leadForm.errors.assigned_to_user_id" class="mt-2 text-sm text-red-500">{{ leadForm.errors.assigned_to_user_id }}</p>
+                            </SelectInput>
+                            <InputError :message="leadForm.errors.assigned_to_user_id" />
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="mb-2 block text-sm font-medium">Notes</label>
-                            <textarea v-model="leadForm.notes" rows="4" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500"></textarea>
-                            <p v-if="leadForm.errors.notes" class="mt-2 text-sm text-red-500">{{ leadForm.errors.notes }}</p>
+                        <div class="grid gap-2 md:col-span-2">
+                            <Label for="lead-notes">Notes</Label>
+                            <textarea
+                                id="lead-notes"
+                                v-model="leadForm.notes"
+                                rows="4"
+                                class="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                            ></textarea>
+                            <InputError :message="leadForm.errors.notes" />
                         </div>
                     </div>
 
                     <div class="mt-5">
-                        <button type="submit" :disabled="leadForm.processing" class="inline-flex items-center rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-70">
-                            {{ leadForm.processing ? 'Saving...' : 'Create lead' }}
-                        </button>
+                        <Button type="submit" :disabled="leadForm.processing">
+                            <Spinner v-if="leadForm.processing" />
+                            Create lead
+                        </Button>
                     </div>
                 </form>
 
-                <div v-else class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 text-sm text-muted-foreground dark:border-sidebar-border">
-                    Your current role can view leads, but cannot create new leads.
+                <div v-else class="rounded-2xl border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
+                    Your current role can view leads, but cannot create new leads. Contact a workspace admin for access.
                 </div>
 
-                <div class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <h2 class="text-lg font-semibold">Recent leads</h2>
-                            <p class="mt-1 text-sm text-muted-foreground">Newest leads in the current tenant workspace.</p>
-                        </div>
-                    </div>
+                <div class="rounded-2xl border border-border bg-card p-6">
+                    <h2 class="text-lg font-semibold">Recent leads</h2>
+                    <p class="mt-1 text-sm text-muted-foreground">Newest leads in the current tenant workspace.</p>
 
                     <div class="mt-5 overflow-x-auto">
                         <table class="min-w-full text-left text-sm">
-                            <thead class="border-b border-sidebar-border/70 text-muted-foreground dark:border-sidebar-border">
+                            <thead class="border-b border-border text-muted-foreground">
                                 <tr>
                                     <th class="px-3 py-3 font-medium">Name</th>
                                     <th class="px-3 py-3 font-medium">Phone</th>
@@ -215,20 +216,20 @@ const submitLeadSource = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="lead in leads" :key="lead.id" class="border-b border-sidebar-border/40 dark:border-sidebar-border/60">
+                                <tr v-for="lead in leads" :key="lead.id" class="border-b border-border/50 transition hover:bg-muted/50">
                                     <td class="px-3 py-3">
                                         <div class="font-medium">{{ lead.name }}</div>
                                         <div class="text-xs text-muted-foreground">{{ lead.email || 'No email' }}</div>
                                     </td>
                                     <td class="px-3 py-3">{{ lead.primaryPhone }}</td>
-                                    <td class="px-3 py-3">
-                                        <span class="rounded-full bg-orange-500/10 px-2.5 py-1 text-xs font-medium text-orange-600 dark:text-orange-300">{{ lead.status }}</span>
-                                    </td>
+                                    <td class="px-3 py-3"><StatusBadge :status="lead.status" /></td>
                                     <td class="px-3 py-3">{{ lead.source || 'Direct' }}</td>
                                     <td class="px-3 py-3">{{ lead.assignedTo || 'Unassigned' }}</td>
                                 </tr>
                                 <tr v-if="leads.length === 0">
-                                    <td colspan="5" class="px-3 py-8 text-center text-muted-foreground">No leads yet. Create the first one from the form above.</td>
+                                    <td colspan="5" class="px-3 py-10 text-center text-muted-foreground">
+                                        No leads yet. Create the first one from the form above.
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -237,45 +238,51 @@ const submitLeadSource = () => {
             </div>
 
             <div class="space-y-6">
-                <form v-if="canCreateLeads" class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border" @submit.prevent="submitLeadSource">
+                <form v-if="canCreateLeads" class="rounded-2xl border border-border bg-card p-6" @submit.prevent="submitLeadSource">
                     <h2 class="text-lg font-semibold">Add lead source</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Track where leads are coming from.</p>
 
                     <div class="mt-5 grid gap-4">
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Source name</label>
-                            <input v-model="leadSourceForm.name" type="text" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500" />
-                            <p v-if="leadSourceForm.errors.name" class="mt-2 text-sm text-red-500">{{ leadSourceForm.errors.name }}</p>
+                        <div class="grid gap-2">
+                            <Label for="source-name">Source name</Label>
+                            <Input id="source-name" v-model="leadSourceForm.name" type="text" required :aria-invalid="Boolean(leadSourceForm.errors.name)" />
+                            <InputError :message="leadSourceForm.errors.name" />
                         </div>
-                        <div>
-                            <label class="mb-2 block text-sm font-medium">Description</label>
-                            <textarea v-model="leadSourceForm.description" rows="3" class="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition focus:border-orange-500"></textarea>
-                            <p v-if="leadSourceForm.errors.description" class="mt-2 text-sm text-red-500">{{ leadSourceForm.errors.description }}</p>
+                        <div class="grid gap-2">
+                            <Label for="source-description">Description</Label>
+                            <textarea
+                                id="source-description"
+                                v-model="leadSourceForm.description"
+                                rows="3"
+                                class="border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px]"
+                            ></textarea>
+                            <InputError :message="leadSourceForm.errors.description" />
                         </div>
                     </div>
 
                     <div class="mt-5">
-                        <button type="submit" :disabled="leadSourceForm.processing" class="inline-flex items-center rounded-lg border border-sidebar-border/70 px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 dark:border-sidebar-border disabled:cursor-not-allowed disabled:opacity-70">
-                            {{ leadSourceForm.processing ? 'Saving...' : 'Add source' }}
-                        </button>
+                        <Button type="submit" variant="secondary" :disabled="leadSourceForm.processing">
+                            <Spinner v-if="leadSourceForm.processing" />
+                            Add source
+                        </Button>
                     </div>
                 </form>
 
-                <div v-else class="rounded-2xl border border-dashed border-sidebar-border/70 bg-background p-6 text-sm text-muted-foreground dark:border-sidebar-border">
+                <div v-else class="rounded-2xl border border-dashed border-border bg-card p-6 text-sm text-muted-foreground">
                     Lead source setup is only available to roles that can create leads.
                 </div>
 
-                <div class="rounded-2xl border border-sidebar-border/70 bg-background p-6 dark:border-sidebar-border">
+                <div class="rounded-2xl border border-border bg-card p-6">
                     <h2 class="text-lg font-semibold">Lead sources</h2>
                     <p class="mt-1 text-sm text-muted-foreground">Available sources for this workspace.</p>
 
                     <div class="mt-5 space-y-3">
-                        <div v-for="source in leadSources" :key="source.id" class="rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
+                        <div v-for="source in leadSources" :key="source.id" class="rounded-xl border border-border p-4">
                             <div class="font-medium">{{ source.name }}</div>
                             <div class="mt-1 text-sm text-muted-foreground">{{ source.description || 'No description yet.' }}</div>
                         </div>
-                        <div v-if="leadSources.length === 0" class="rounded-xl border border-dashed border-sidebar-border/70 p-4 text-sm text-muted-foreground dark:border-sidebar-border">
-                            No lead sources yet.
+                        <div v-if="leadSources.length === 0" class="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
+                            No lead sources yet. Add one to start tracking where leads come from.
                         </div>
                     </div>
                 </div>
